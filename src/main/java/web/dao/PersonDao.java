@@ -10,20 +10,24 @@ import web.model.Person;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
 public class PersonDao implements PersDao {
-/*
+
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
     public List<Person> upindex() {
-        return entityManager.createQuery("FROM Person", Person.class).getResultList();
+        TypedQuery<Person> query = entityManager.createQuery("FROM Person ORDER BY id ASC", Person.class);
+        return query.getResultList();
+
+        // return entityManager.createQuery("FROM Person", Person.class).getResultList();
     }
 
     @Override
@@ -33,9 +37,9 @@ public class PersonDao implements PersDao {
 
     @Override
     public Person show(int id) {
-        Person person = entityManager.find(Person.class,id);
-        entityManager.detach(person);
-        return person;
+      //  Person person = entityManager.find(Person.class, id);
+       // entityManager.detach(person);
+        return entityManager.find(Person.class, id);
     }
 
     @Override
@@ -50,7 +54,8 @@ public class PersonDao implements PersDao {
             entityManager.remove(person);
         }
     }
-*/
+}
+
 /*    @Override
     public List<Person> upindex() {
         EntityManager entityManager = null;
@@ -154,7 +159,7 @@ public class PersonDao implements PersDao {
 }
 */
 
-
+/*
     private static int PEOPLE_COUNT = 0;
 
     private static final String URL = "jdbc:postgresql://localhost:5432/mybaze";
@@ -314,4 +319,4 @@ public class PersonDao implements PersDao {
         }
     }
 
-}
+}*/

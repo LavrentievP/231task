@@ -1,6 +1,7 @@
 package web.config;
 
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.SessionFactory;
 
 //import org.hibernate.cfg.Configuration;
@@ -34,7 +35,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Properties;
-/*
+
 @Configuration
 @PropertySource("classpath:db.properties")
 @EnableTransactionManagement
@@ -48,8 +49,51 @@ public class SessionConfig {
     public SessionConfig(Environment env) {
         this.env = env;
     }
-
     @Bean
+    public DataSource dataSource() { // Настройка пула соединений с использованием Apache Commons DBCP
+        BasicDataSource dataSource = new BasicDataSource();
+        dataSource.setDriverClassName(env.getProperty("db.driver"));
+        dataSource.setUrl(env.getProperty("db.url"));
+        dataSource.setUsername(env.getProperty("db.username"));
+        dataSource.setPassword(env.getProperty("db.password"));
+        dataSource.setInitialSize(5); // начальное количество соединений
+        dataSource.setMaxTotal(10); // максимальное количество соединений
+        return dataSource;
+    }
+
+
+
+    @Bean // Настройка EntityManagerFactory
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+        LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
+        factoryBean.setDataSource(dataSource());
+        factoryBean.setPackagesToScan("web.model"); // Сканируем пакет с сущностями
+
+        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        vendorAdapter.setShowSql(true);
+        vendorAdapter.setGenerateDdl(false); // отключаем автоматическое создание схемы, если это не нужно
+        factoryBean.setJpaVendorAdapter(vendorAdapter);
+
+        Properties jpaProperties = new Properties();
+        jpaProperties.put("hibernate.hbm2ddl.auto", env.getProperty("hibernate.hbm2ddl.auto"));
+        jpaProperties.put("hibernate.dialect", env.getProperty("hibernate.dialect"));
+        jpaProperties.put("hibernate.show_sql", env.getProperty("hibernate.show_sql"));
+        jpaProperties.put("hibernate.format_sql", env.getProperty("hibernate.format_sql"));
+
+        factoryBean.setJpaProperties(jpaProperties);
+
+        return factoryBean;
+    }
+
+
+
+    @Bean // Настройка менеджера транзакций
+    public JpaTransactionManager transactionManager() {
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
+        return transactionManager;
+    }
+    /*@Bean
     public DataSource getDataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(env.getProperty("db.driver"));
@@ -93,11 +137,11 @@ public class SessionConfig {
         transactionManager.setEntityManagerFactory(emf);
         return transactionManager;
     }
-}
-*/
+}*/
 
-@org.springframework.context.annotation.Configuration
-public class SessionConfig {
+
+//@org.springframework.context.annotation.Configuration
+//public class SessionConfig {
   /*  public static SessionFactory getSessionFactory() {
         final String fileName = "db.properties";
         SessionFactory sessionFactory = null;

@@ -8,44 +8,48 @@ import web.dao.PersDao;
 
 import web.model.Person;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.List;
 @Service
 public class PersonServise implements PersServ {
 
-private PersDao dao ;
+    @PersistenceContext
+    private EntityManager entityManager;
+    ;
 
-    @Autowired
-    public PersonServise( PersDao dao) {
-        this.dao = dao;
-    }
 
     @Override
     @Transactional
     public List<Person> upindex() {
-        return dao.upindex();
+        return entityManager.createQuery("FROM Person", Person.class).getResultList();
     }
 
     @Override
     @Transactional
     public Person show(int id) {
-        return dao.show(id);
+        return entityManager.find(Person.class, id);
     }
 
     @Override
     @Transactional
     public void save(Person person) {
-        dao.save(person);
+        entityManager.persist(person);
     }
 
     @Override
     @Transactional
     public void update(int id, Person updatedPerson) {
-        dao.update(id,updatedPerson);
+        entityManager.merge(updatedPerson);
     }
 
     @Override
     @Transactional
     public void delete(int id) {
-        dao.delete(id);
+        Person person = entityManager.find(Person.class, id);
+        if (person != null) {
+            entityManager.remove(person);
+
+        }
     }
 }

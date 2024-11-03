@@ -51,13 +51,13 @@ public class SessionConfig {
     }
     @Bean
     public DataSource dataSource() { // Настройка пула соединений с использованием Apache Commons DBCP
-        BasicDataSource dataSource = new BasicDataSource();
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(env.getProperty("db.driver"));
         dataSource.setUrl(env.getProperty("db.url"));
         dataSource.setUsername(env.getProperty("db.username"));
         dataSource.setPassword(env.getProperty("db.password"));
-        dataSource.setInitialSize(5); // начальное количество соединений
-        dataSource.setMaxTotal(10); // максимальное количество соединений
+       // dataSource.setInitialSize(5); // начальное количество соединений
+        //dataSource.setMaxTotal(10); // максимальное количество соединений
         return dataSource;
     }
 
@@ -170,7 +170,7 @@ public static EntityManager getEntityManager() {
         try (InputStream input = SessionConfig.class.getClassLoader().getResourceAsStream(fileName)) {
             Properties properties = new Properties();
             properties.load(input);
-            entityManagerFactory = Persistence.createEntityManagerFactory("hibernate", properties);
+            entityManagerFactory = Persistence.createEntityManagerFactory("db.properties", properties);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
